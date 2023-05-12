@@ -9,7 +9,7 @@ export default async function (manager: Manager, settings: ComponentSettings, cl
     var sendEvents:string[] = []
     const eventsParam:string = JSON.stringify({ //needs to stringify
       'event_type': 'Pageview',
-      'user_id':'01234',
+      'user_id':'yair@webcm.com',
       'device_id':'56789'
     }); 
     sendEvents.push(eventsParam)
