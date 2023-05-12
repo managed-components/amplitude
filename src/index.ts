@@ -25,7 +25,7 @@ export default async function (manager: Manager, settings: ComponentSettings, cl
         events: sendEvents
       })
     })
-    console.log('🦔plitude')
+    client.execute("console.log('🦔plitude')")
   }
  )
 }
