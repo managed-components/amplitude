@@ -1,49 +1,100 @@
-# Demo Managed Component
+# Amplitude Managed Component
 
-Find out more about Managed Components [here](https://blog.cloudflare.com/zaraz-open-source-managed-components-and-webcm/) for inspiration and motivation details.
+## Supported Event Types
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+`pageview`, `ecommerce`, `event`
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+## General Information
 
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+This Managed Component (MC) uses [Amplitude’s HTTP API v2](https://www.docs.developers.amplitude.com/analytics/apis/http-v2-api-quickstart/). It employs the Fetch API to send server-side requests to Amplitude’s endpoint. The MC assigns a User ID (UUID), Session ID (timestamp at the beginning of a session), and Event ID (counter) to every visitor. It uses the KV storage to save these.
 
-[![Released under the Apache license.](https://img.shields.io/badge/license-apache-blue.svg)](./LICENSE)
-[![PRs welcome!](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+---
 
-## 🚀 Quickstart local dev environment
+## Tool Settings
 
-1. Make sure you're running node version >=18.
-2. Install dependencies with `npm i`
-3. Run unit test watcher with `npm run test:dev`
+Settings are used to configure the tool in a Component Manager config file.
 
-## 📝 License
+1. API Key, `string`, _required_
+   - See [Find your Amplitude Project API Credentials](https://www.docs.developers.amplitude.com/analytics/find-api-credentials/) for help locating your credentials.
+2. Device IDs and User IDs minimum length, number, _optional_
 
-Licensed under the [Apache License](./LICENSE).
+—
 
-## 💜 Thanks
+## Fields Description
 
-Thanks to everyone contributing in any manner for this repo and to everyone working on Open Source in general.
+Fields are properties that can/must be sent with certain events.
 
-## Contributors ✨
+### Required Fields
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+- Name, `string` _required_
+  - The property `name` (holding the event name) will be sent to Amplitude as `event_type`.
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/simonabadoiu"><img src="https://avatars.githubusercontent.com/u/1610123?v=4?s=75" width="75px;" alt=""/><br /><sub><b>Simona Badoiu</b></sub></a><br /><a href="https://github.com/managed-components/@managed-components/demo/commits?author=simonabadoiu" title="Code">💻</a></td>
-    <td align="center"><a href="https://yoavmoshe.com/about"><img src="https://avatars.githubusercontent.com/u/55081?v=4?s=75" width="75px;" alt=""/><br /><sub><b>Yo'av Moshe</b></sub></a><br /><a href="https://github.com/managed-components/@managed-components/demo/commits?author=bjesus" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/jonnyparris"><img src="https://avatars.githubusercontent.com/u/6400000?v=4?s=75" width="75px;" alt=""/><br /><sub><b>Ruskin</b></sub></a><br /><a href="https://github.com/managed-components/@managed-components/demo/commits?author=jonnyparris" title="Code">💻</a></td>
-  </tr>
-</table>
+---
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+### Event, User & Group Fields/Properties `string` _optional_
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+Amplitude distinguishes between Event Properties, User Properties, and Group Properties. To use these features, follow the instructions below:
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+- All Properties are by default sent as Event Properties. This is true with the exception of properties that begin with `user_` or `groups_` prefixes.
+- To send User Properties, name your fields/event parameters with the prefix `“user_”`. For example, in WebCM: `webcm.track(‘event’, {name: ‘signup’, user_name: ‘My Name’})`. Since in WebCM all of the event properties are automatically directed to the tool (without the need for mapping configuration), the following code should end up adding `user_name` to the User Properties. It will omit the prefix from the property name, so it will send `name` as the key and `My Name` as the value.
+- To send Groups Properties, name your fields/event parameters with the prefix `“groups_”`. For example, in WebCM: `webcm.track(‘event’, {name: ‘signup’, groups_company: ‘My Company Name’})`. Since in WebCM all of the event properties are automatically directed to the tool (without the need for mapping configuration), the following code should end up adding `groups_company` to the Groups Properties. It will omit the prefix from the property name, so it will send `company` as the key and `My Company` as the value.
+
+---
+
+### Ecommerce
+
+Amplitude allows sending the following types of ecommerce properties: `price`, `quantity`, `productId`, `revenue` and `revenueType`. You can see their definitions [here](https://www.docs.developers.amplitude.com/analytics/apis/http-v2-api/#keys-for-the-event-argument). In this implementation we do not use the `price` property.
+
+This MC therefore, supports two types of Ecommerce events:
+
+1. Order Completed
+2. Order Refunded
+
+You should use exactly these and send them as the `name` property for ecommerce to work. Together with each one, you can send the following properties:
+
+1. `revenue`, `total` or `value` (the
+
+MC will first look for `revenue` and if not found, `value` and so on) 2. `products` - an array of products and their details
+
+So for example, in WebCM the following snippet:
+
+```javascript
+webcm.track('ecommerce', {
+  name: 'Order Completed',
+  order_id: '1234',
+  total: 30.0,
+  revenue: 25.0,
+  shipping: 3,
+  tax: 2,
+  coupon: 'winter-sale',
+  currency: 'USD',
+  products: [
+    {
+      product_id: '1111product',
+      sku: '1234',
+      name: 'Shorts',
+      price: 10,
+      quantity: 2,
+      category: 'shorts',
+    },
+    {
+      product_id: '2222product',
+      sku: '5678',
+      name: 'T-shirt',
+      price: 5,
+      quantity: 2,
+      category: 'T-shirts',
+    },
+  ],
+})
+```
+
+Will result in sending these Event Properties:
+
+- `$price`: `25.0`
+- `$productId`: `1111product,2222product`
+- `$quantity`: `2`
+- `$revenue`: `25.0`
+- `$revenueType`: `Purchase`
+
+---

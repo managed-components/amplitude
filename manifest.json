@@ -1,34 +1,14 @@
 {
-  "name": "Demo Component",
-  "description": "Demo Component",
-  "namespace": "demo",
-  "icon": "assets/demo.svg",
-  "categories": ["Advertising"],
+  "name": "Amplitude",
+  "description": "Amplitude Managed Component",
+  "namespace": "amplitude",
+  "icon": "assets/amplitude.svg",
+  "categories": ["Analytics"],
   "provides": ["events"],
   "allowCustomFields": true,
   "permissions": {
-    "serve_static_files": {
-      "description": "ExampleTool serves a static file. Not giving this permission will not affect the main purpose of ExampleTool.",
-      "required": false
-    },
-    "provide_server_functionality": {
-      "description": "Allow ExampleTool to create a reverse proxy from '/gate' to 'http://n-gate.com' and define custom server side logic.",
-      "required": true
-    },
-    "client_network_requests": {
-      "description": "ExampleTool uses cookies to attribute sessions more accurately",
-      "required": false
-    },
-    "execute_unsafe_scripts": {
-      "description": "Simple logs for debugging purposes",
-      "required": false
-    },
-    "provide_widget": {
-      "description": "Widgets are not the essential part of this component but a very useful one",
-      "required": false
-    },
     "access_client_kv": {
-      "description": "ExampleTool uses cookies to attribute sessions more accurately",
+      "description": "Amplitude uses cookies to attribute sessions more accurately",
       "required": true
     }
   }
