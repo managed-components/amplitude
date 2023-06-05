@@ -1,13 +1,12 @@
 import { ComponentSettings, Manager, MCEvent } from '@managed-components/types'
 import UAParser from 'ua-parser-js'
-import { randomUUID } from 'crypto'
 
 // Get the user ID stored in the client, if it does not exist, make a random one, save it in the client, and return it.
 const getUserId = (event: MCEvent) => {
   const { client } = event
   let userId = client.get('user_id')
   if (!userId) {
-    userId = randomUUID()
+    userId = crypto.randomUUID()
     client.set('user_id', userId, { scope: 'infinite' })
   }
   return userId
