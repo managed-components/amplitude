@@ -26,15 +26,9 @@ const getSessionId = (event: MCEvent) => {
 // Get the Event ID stored in the client, add +1 to it, and set the new value in the client
 const getEventId = (event: MCEvent) => {
   const { client } = event
-  let eventId: any = client.get('event_id')
-  if (!eventId) {
-    eventId = '1'
-    client.set('event_id', eventId, { scope: 'infinite' })
-  } else {
-    eventId = (parseInt(eventId, 10) + 1).toString()
-    client.set('event_id', eventId, { scope: 'infinite' })
-  }
-  return eventId
+  let eventId = parseInt(client.get('event_id') as string) || 1
+  eventId++
+  client.set('event_id', eventId.toString(), { scope: 'infinite' })
 }
 
 export default async function (manager: Manager, settings: ComponentSettings) {
@@ -47,7 +41,6 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     const eventData = {
       event_type: pageview ? 'pageview' : payload.name,
       user_id: getUserId(event),
-      time: `${new Date().getTime()}`,
       event_properties: { url: client.url },
       user_properties: {},
       groups: {},
@@ -68,6 +61,10 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       ...(payload.insert_id && {
         insert_id: payload.insert_id,
       }),
+      ...(payload.revenue && { revenue: payload.revenue }),
+      ...(payload.revenueType && { revenueType: payload.revenueType }),
+      ...(payload.productId && { productId: payload.productId }),
+      ...(payload.quantity && { quantity: payload.quantity }),
     }
 
     for (const [key, value] of Object.entries(payload)) {
@@ -75,8 +72,6 @@ export default async function (manager: Manager, settings: ComponentSettings) {
         eventData.user_properties[key.substring(5)] = value
       } else if (key.startsWith('groups_')) {
         eventData.groups[key.substring(7)] = value
-      } else if (key.startsWith('ecom_')) {
-        eventData[key.substring(5)] = value
       } else {
         eventData.event_properties[key] = value
       }
@@ -91,27 +86,23 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     if (type === 'ecommerce') {
       switch (name) {
         case 'Order Completed':
-          payload.ecom_revenue =
-            payload.revenue || payload.total || payload.value
-          payload.ecom_revenueType = 'Purchase'
-          payload.ecom_productId = payload.products
+          payload.revenue = payload.revenue || payload.total || payload.value
+          payload.revenueType = 'Purchase'
+          payload.productId = payload.products
             .map((product: any) => product.product_id)
             .join()
-          payload.ecom_quantity = payload.products.reduce(
+          payload.quantity ??= payload.products.reduce(
             (sum: any, product: any) => sum + parseInt(product.quantity, 10),
             0
           )
           break
         case 'Order Refunded':
-          payload.ecom_revenue =
-            payload.revenue || payload.total || payload.value
-          payload.ecom_revenueType = 'Refund'
-          payload.ecom_quantity = payload.products.reduce(
-            (sum: any, product: any) => sum + parseInt(product.quantity, 10),
-            0
-          )
-          console.log(payload.products)
-          payload.ecom_quantity = payload.products.reduce(
+          payload.revenue = payload.revenue || payload.total || payload.value
+          payload.revenueType = 'Refund'
+          payload.productId = payload.products
+            .map((product: any) => product.product_id)
+            .join()
+          payload.quantity ??= payload.products.reduce(
             (sum: any, product: any) => sum + parseInt(product.quantity, 10),
             0
           )
