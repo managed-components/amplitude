@@ -14,11 +14,13 @@ This Managed Component (MC) uses [Amplitude’s HTTP API v2](https://www.docs.de
 
 Settings are used to configure the tool in a Component Manager config file.
 
-1. API Key, `string`, _required_
-   - See [Find your Amplitude Project API Credentials](https://www.docs.developers.amplitude.com/analytics/find-api-credentials/) for help locating your credentials.
-2. Device IDs and User IDs minimum length, number, _optional_
+1. `api_key`, `string`, _required_
 
-—
+- See [Find your Amplitude Project API Credentials](https://www.docs.developers.amplitude.com/analytics/find-api-credentials/) for help locating your credentials.
+
+2. `min_id_length`, `Integer`, _optional_
+
+- Use this field to override the Device IDs and User IDs minimum length. For more information, see Amplitude's docs for [Options](https://www.docs.developers.amplitude.com/analytics/apis/http-v2-api/#options).
 
 ## Fields Description
 
@@ -26,8 +28,8 @@ Fields are properties that can/must be sent with certain events.
 
 ### Required Fields
 
-- Name, `string` _required_
-  - The property `name` (holding the event name) will be sent to Amplitude as `event_type`.
+- `event_type`, `string` _required_
+  - Amplitude's `event_type` property should be holding the event name. In this implementation, the event name will be set to 'pageview' for a pageview event type. In case of event/ecommerce event types, it will recieve `payload.name`. For example, in WebCM, `webcm.track('event', {name: 'signup'})` will result in sending `event_type: 'signup'`.
 
 ---
 
@@ -35,9 +37,9 @@ Fields are properties that can/must be sent with certain events.
 
 Amplitude distinguishes between Event Properties, User Properties, and Group Properties. To use these features, follow the instructions below:
 
-- All Properties are by default sent as Event Properties. This is true with the exception of properties that begin with `user_` or `groups_` prefixes.
-- To send User Properties, name your fields/event parameters with the prefix `“user_”`. For example, in WebCM: `webcm.track(‘event’, {name: ‘signup’, user_name: ‘My Name’})`. Since in WebCM all of the event properties are automatically directed to the tool (without the need for mapping configuration), the following code should end up adding `user_name` to the User Properties. It will omit the prefix from the property name, so it will send `name` as the key and `My Name` as the value.
-- To send Groups Properties, name your fields/event parameters with the prefix `“groups_”`. For example, in WebCM: `webcm.track(‘event’, {name: ‘signup’, groups_company: ‘My Company Name’})`. Since in WebCM all of the event properties are automatically directed to the tool (without the need for mapping configuration), the following code should end up adding `groups_company` to the Groups Properties. It will omit the prefix from the property name, so it will send `company` as the key and `My Company` as the value.
+- All Properties are by default sent as `event_properties`. This is true with the exception of properties that begin with `user_` or `groups_` prefixes.
+- To send `user_properties`, name your fields/event parameters with the prefix `"user_"`. For example, in WebCM: `webcm.track('event', { name: 'signup', user_name: 'My Name' })`. Since in WebCM, all event properties are automatically directed to the tool without the need for mapping configuration, the following code should add `user_name` to `user_properties`. It will omit the prefix from the property name, so it will send `name` as the key and `My Name` as the value.
+- To send the `groups` property, name your fields/event parameters with the prefix `“groups_”`. For example, in WebCM: `webcm.track('event', {name: 'signup', groups_company: 'My Company Name'})`. Since in WebCM all of the event properties are automatically directed to the tool (without the need for mapping configuration), the following code should end up adding `groups_company` to `groups`. It will omit the prefix from the property name, so it will send `company` as the key and `My Company` as the value.
 
 ---
 
@@ -52,9 +54,8 @@ This MC therefore, supports two types of Ecommerce events:
 
 You should use exactly these and send them as the `name` property for ecommerce to work. Together with each one, you can send the following properties:
 
-1. `revenue`, `total` or `value` (the
-
-MC will first look for `revenue` and if not found, `value` and so on) 2. `products` - an array of products and their details
+1. `revenue`, `total` or `value` (the MC will first look for `revenue` and if not found, `value` and so on)
+2. `products` - an array of products and their details
 
 So for example, in WebCM the following snippet:
 
