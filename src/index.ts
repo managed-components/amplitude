@@ -39,7 +39,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     // eventData builds the eventData object to be used in the request body
 
     const eventData = {
-      event_type: pageview ? 'pageview' : payload.name,
+      event_type: pageview ? 'pageview' : payload.event_type,
       user_id: getUserId(event),
       event_properties: { url: client.url },
       user_properties: {},
