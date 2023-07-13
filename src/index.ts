@@ -87,9 +87,9 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     payload = { ...payload, ...payload.ecommerce }
     delete payload.ecommerce
     if (type === 'ecommerce') {
+      payload.event_type = name
       switch (name) {
         case 'Order Completed':
-          payload.event_type = name
           payload.revenue = payload.revenue || payload.total || payload.value
           payload.revenueType = 'Purchase'
           payload.productId = payload.products
@@ -101,7 +101,6 @@ export default async function (manager: Manager, settings: ComponentSettings) {
           )
           break
         case 'Order Refunded':
-          payload.event_type = name
           payload.revenue = payload.revenue || payload.total || payload.value
           payload.revenueType = 'Refund'
           payload.productId = payload.products
