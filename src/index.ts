@@ -82,7 +82,9 @@ export default async function (manager: Manager, settings: ComponentSettings) {
   // maps ecommerce data: ampliteude handles only transaction data (order completed/Refunded), the rest of the events will be just added to the event_properties object like any other event, but without the need for triggers)
 
   const ecomDataMap = (event: MCEvent) => {
-    const { payload, type, name } = event
+    let { payload, type, name } = event
+    payload = { ...payload, ...payload.ecommerce }
+    delete payload.ecommerce
     if (type === 'ecommerce') {
       switch (name) {
         case 'Order Completed':
