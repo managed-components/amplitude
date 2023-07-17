@@ -88,31 +88,16 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     delete payload.ecommerce
     if (type === 'ecommerce') {
       payload.event_type = name
-      switch (name) {
-        case 'Order Completed':
-          payload.revenue = payload.revenue || payload.total || payload.value
-          payload.revenueType = 'Purchase'
-          payload.productId = payload.products
-            .map((product: any) => product.product_id)
-            .join()
-          payload.quantity ??= payload.products.reduce(
-            (sum: any, product: any) => sum + parseInt(product.quantity, 10),
-            0
-          )
-          break
-        case 'Order Refunded':
-          payload.revenue = payload.revenue || payload.total || payload.value
-          payload.revenueType = 'Refund'
-          payload.productId = payload.products
-            .map((product: any) => product.product_id)
-            .join()
-          payload.quantity ??= payload.products.reduce(
-            (sum: any, product: any) => sum + parseInt(product.quantity, 10),
-            0
-          )
-          break
-        default:
-      }
+      payload.productId = payload.products
+        .map((product: any) => product.product_id)
+        .join()
+      payload.quantity ??= payload.products.reduce(
+        (sum: any, product: any) => sum + parseInt(product.quantity, 10),
+        0
+      )
+      payload.revenue = payload.revenue || payload.total || payload.value
+      if (name === 'Order Completed') payload.revenueType = 'Purchase'
+      else if (name === 'Order Refunded') payload.revenueType = 'Refund'
     }
   }
 
