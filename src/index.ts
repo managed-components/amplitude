@@ -32,10 +32,16 @@ const getEventId = (event: MCEvent) => {
 }
 
 export default async function (manager: Manager, settings: ComponentSettings) {
-  const getEventData = (event: MCEvent, pageview: boolean) => {
-    const { client, payload } = event
+  const getEventData = (
+    event: MCEvent,
+    pageview: boolean,
+    ecomPayload?: any
+  ) => {
+    let { client, payload } = event
     const parsedUserAgent = UAParser(client.userAgent)
-
+    if (ecomPayload) {
+      payload = ecomPayload
+    }
     // eventData builds the eventData object to be used in the request body
 
     const eventData = {
@@ -82,38 +88,24 @@ export default async function (manager: Manager, settings: ComponentSettings) {
   // maps ecommerce data: ampliteude handles only transaction data (order completed/Refunded), the rest of the events will be just added to the event_properties object like any other event, but without the need for triggers)
 
   const ecomDataMap = (event: MCEvent) => {
-    let { payload, type, name } = event
+    const { type, name } = event
+    let { payload } = event
     payload = { ...payload, ...payload.ecommerce }
     delete payload.ecommerce
     if (type === 'ecommerce') {
-      switch (name) {
-        case 'Order Completed':
-          payload.event_type = name
-          payload.revenue = payload.revenue || payload.total || payload.value
-          payload.revenueType = 'Purchase'
-          payload.productId = payload.products
-            .map((product: any) => product.product_id)
-            .join()
-          payload.quantity ??= payload.products.reduce(
-            (sum: any, product: any) => sum + parseInt(product.quantity, 10),
-            0
-          )
-          break
-        case 'Order Refunded':
-          payload.event_type = name
-          payload.revenue = payload.revenue || payload.total || payload.value
-          payload.revenueType = 'Refund'
-          payload.productId = payload.products
-            .map((product: any) => product.product_id)
-            .join()
-          payload.quantity ??= payload.products.reduce(
-            (sum: any, product: any) => sum + parseInt(product.quantity, 10),
-            0
-          )
-          break
-        default:
-      }
+      payload.event_type = name
+      payload.productId = payload.products
+        .map((product: any) => product.product_id)
+        .join()
+      payload.quantity ??= payload.products.reduce(
+        (sum: any, product: any) => sum + parseInt(product.quantity, 10),
+        0
+      )
+      payload.revenue = payload.revenue || payload.total || payload.value
+      if (name === 'Order Completed') payload.revenueType = 'Purchase'
+      else if (name === 'Order Refunded') payload.revenueType = 'Refund'
     }
+    return payload
   }
 
   manager.addEventListener('pageview', async event => {
@@ -127,8 +119,8 @@ export default async function (manager: Manager, settings: ComponentSettings) {
   })
 
   manager.addEventListener('ecommerce', async event => {
-    ecomDataMap(event)
-    const eventData = getEventData(event, false)
+    const ecomPayload = ecomDataMap(event)
+    const eventData = getEventData(event, false, ecomPayload)
     sendEvent(eventData)
   })
 
@@ -141,6 +133,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       }), //if user configured a min_id_length in the options, include the options object
       events: [eventData],
     }
+
     const amplitudeEndpoint = 'https://api2.amplitude.com/2/httpapi'
     manager.fetch(amplitudeEndpoint, {
       method: 'POST',
