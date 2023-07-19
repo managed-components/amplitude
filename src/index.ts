@@ -37,11 +37,9 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     pageview: boolean,
     ecomPayload?: any
   ) => {
-    let { client, payload } = event
+    const { client } = event
     const parsedUserAgent = UAParser(client.userAgent)
-    if (ecomPayload) {
-      payload = ecomPayload
-    }
+    const payload = ecomPayload ? ecomPayload : event.payload
     // eventData builds the eventData object to be used in the request body
 
     const eventData = {
