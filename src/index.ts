@@ -40,6 +40,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     const { client } = event
     const parsedUserAgent = UAParser(client.userAgent)
     const payload = ecomPayload ? ecomPayload : event.payload
+
     // eventData builds the eventData object to be used in the request body
 
     const eventData = {
