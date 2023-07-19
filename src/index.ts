@@ -32,10 +32,16 @@ const getEventId = (event: MCEvent) => {
 }
 
 export default async function (manager: Manager, settings: ComponentSettings) {
-  const getEventData = (event: MCEvent, pageview: boolean) => {
-    const { client, payload } = event
+  const getEventData = (
+    event: MCEvent,
+    pageview: boolean,
+    ecomPayload?: any
+  ) => {
+    let { client, payload } = event
     const parsedUserAgent = UAParser(client.userAgent)
-
+    if (ecomPayload) {
+      payload = ecomPayload
+    }
     // eventData builds the eventData object to be used in the request body
 
     const eventData = {
@@ -99,6 +105,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       if (name === 'Order Completed') payload.revenueType = 'Purchase'
       else if (name === 'Order Refunded') payload.revenueType = 'Refund'
     }
+    return payload
   }
 
   manager.addEventListener('pageview', async event => {
@@ -112,8 +119,8 @@ export default async function (manager: Manager, settings: ComponentSettings) {
   })
 
   manager.addEventListener('ecommerce', async event => {
-    ecomDataMap(event)
-    const eventData = getEventData(event, false)
+    const ecomPayload = ecomDataMap(event)
+    const eventData = getEventData(event, false, ecomPayload)
     sendEvent(eventData)
   })
 
@@ -126,6 +133,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       }), //if user configured a min_id_length in the options, include the options object
       events: [eventData],
     }
+
     const amplitudeEndpoint = 'https://api2.amplitude.com/2/httpapi'
     manager.fetch(amplitudeEndpoint, {
       method: 'POST',
