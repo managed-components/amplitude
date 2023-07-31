@@ -4,10 +4,14 @@ import UAParser from 'ua-parser-js'
 // Get the user ID stored in the client, if it does not exist, make a random one, save it in the client, and return it.
 const getUserId = (event: MCEvent) => {
   const { client } = event
-  let userId = client.get('user_id')
-  if (!userId) {
-    userId = crypto.randomUUID()
-    client.set('user_id', userId, { scope: 'infinite' })
+  if (event.payload.user_id) {
+    let userId = event.payload.user_id
+  } else {
+    let userId = client.get('user_id')
+    if (!userId) {
+      userId = crypto.randomUUID()
+      client.set('user_id', userId, { scope: 'infinite' })
+    }
   }
   return userId
 }
