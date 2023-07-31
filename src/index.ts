@@ -8,10 +8,10 @@ const getUserId = (event: MCEvent) => {
     let userId = event.payload.user_id
   } else {
     let userId = client.get('user_id')
-    if (!userId) {
-      userId = crypto.randomUUID()
-      client.set('user_id', userId, { scope: 'infinite' })
-    }
+  }
+  if (!userId) {
+    userId = crypto.randomUUID()
+    client.set('user_id', userId, { scope: 'infinite' })
   }
   return userId
 }
