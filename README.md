@@ -48,6 +48,10 @@ Amplitude distinguishes between Event Properties, User Properties, and Group Pro
 
 `groups` To send the `groups` property, name your fields/event parameters with the prefix `“groups_”`. For example, in WebCM: `webcm.track('event', {name: 'signup', groups_company: 'My Company Name'})`. Since in WebCM all of the event properties are automatically directed to the tool (without the need for mapping configuration), the following code should end up adding `groups_company` to `groups`. It will omit the prefix from the property name, so it will send `company` as the key and `My Company` as the value.
 
+##### User ID `string` _optional_
+
+`user_id` The `user_id` field is automatically generated with a random string unless it is specifically provided as a parameter with an event. In such cases, the provided value will override the automatically generated one.
+
 ---
 
 ## Ecommerce
