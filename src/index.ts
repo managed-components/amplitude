@@ -37,7 +37,9 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     pageview: boolean,
     ecomPayload?: any
   ) => {
-    let { client, payload } = event
+    // eslint-disable-next-line prefer-const
+    const { client } = event
+    let { payload } = event
     const parsedUserAgent = UAParser(client.userAgent)
     if (ecomPayload) {
       payload = ecomPayload
