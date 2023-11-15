@@ -1,1 +1,7 @@
 src
+.eslintrc.js
+.github/workflows/test.yml
+.prettierrc
+esbuild.js
+tsconfig.build.json
+tsconfig.json
