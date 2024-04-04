@@ -10,6 +10,10 @@
     "access_client_kv": {
       "description": "Amplitude uses cookies to attribute sessions more accurately",
       "required": true
+    },
+    "server_network_requests": {
+      "description": "Amplitude uses serverside network requests to report session data",
+      "required": true
     }
   }
 }
