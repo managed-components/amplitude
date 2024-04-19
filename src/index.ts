@@ -11,6 +11,18 @@ const getUserId = (event: MCEvent) => {
   }
   return userId
 }
+
+// Get the device ID stored in the client, if it does not exist, make a random one, save it in the client, and return it.
+const getDeviceId = (event: MCEvent) => {
+  const { client } = event
+  let deviceId = event.payload.device_id || client.get('device_id')
+  if (!deviceId) {
+    deviceId = crypto.randomUUID()
+    client.set('device_id', deviceId, { scope: 'infinite' })
+  }
+  return deviceId
+}
+
 // Get the session ID stored in the client, if it does not exist, make a new one, save it in the client, and return it.
 
 const getSessionId = (event: MCEvent) => {
@@ -57,7 +69,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       device_manufacturer: parsedUserAgent.device.vendor,
       device_model: parsedUserAgent.device.model,
       ...(payload.device_id && {
-        device_id: payload.device_id,
+        device_id: getDeviceId(event),
       }),
       ...(payload.app_version && {
         app_version: payload.app_version,
