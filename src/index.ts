@@ -68,9 +68,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       os_version: parsedUserAgent.os.version,
       device_manufacturer: parsedUserAgent.device.vendor,
       device_model: parsedUserAgent.device.model,
-      ...(payload.device_id && {
-        device_id: getDeviceId(event),
-      }),
+      device_id: getDeviceId(event),
       ...(payload.app_version && {
         app_version: payload.app_version,
       }),
