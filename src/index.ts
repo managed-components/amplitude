@@ -1,13 +1,12 @@
 import { ComponentSettings, Manager, MCEvent } from '@managed-components/types'
 import UAParser from 'ua-parser-js'
 
-// Get the user ID stored in the client, if it does not exist, make a random one, save it in the client, and return it.
+// Get the user ID stored in the client, if it does not exist, then do not set it.
 const getUserId = (event: MCEvent) => {
   const { client } = event
   let userId = event.payload.user_id || client.get('user_id')
   if (!userId) {
-    userId = crypto.randomUUID()
-    client.set('user_id', userId, { scope: 'infinite' })
+    return null
   }
   return userId
 }
@@ -53,10 +52,14 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     const parsedUserAgent = UAParser(client.userAgent)
     const payload = ecomPayload ? ecomPayload : event.payload
     // eventData builds the eventData object to be used in the request body
+    const userId = getUserId(event);
 
     const eventData = {
       event_type: pageview ? 'pageview' : payload.event_type,
-      user_id: getUserId(event),
+      ...(userId && {
+        user_id: userId,
+      })
+      user_id?: getUserId(event),
       event_properties: { url: client.url },
       user_properties: {},
       groups: {},
