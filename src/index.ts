@@ -4,7 +4,7 @@ import UAParser from 'ua-parser-js'
 // Get the user ID stored in the client, if it does not exist, then do not set it.
 const getUserId = (event: MCEvent): string | null => {
   const { client } = event
-  let userId = event.payload.user_id || client.get('user_id')
+  const userId = event.payload.user_id || client.get('user_id')
   if (!userId) {
     return null
   }
