@@ -3,15 +3,15 @@ import UAParser from 'ua-parser-js'
 
 // Get the user ID stored in the client, if it does not exist, then do not set it.
 const getUserId = (event: MCEvent): string | null => {
-  const { client } = event;
-  let userId = event.payload.user_id || client.get('user_id');
+  const { client } = event
+  let userId = event.payload.user_id || client.get('user_id')
   if (!userId) {
-    return null;
+    return null
   }
   if (event.payload.user_id) {
-    client.set('user_id', userId, { scope: 'infinite' });
+    client.set('user_id', userId, { scope: 'infinite' })
   }
-  return userId;
+  return userId
 }
 
 // Get the device ID stored in the client, if it does not exist, make a random one, save it in the client, and return it.
@@ -55,7 +55,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     const parsedUserAgent = UAParser(client.userAgent)
     const payload = ecomPayload ? ecomPayload : event.payload
     // eventData builds the eventData object to be used in the request body
-    const userId = getUserId(event);
+    const userId = getUserId(event)
 
     const eventData = {
       event_type: pageview ? 'pageview' : payload.event_type,
