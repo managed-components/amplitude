@@ -2,13 +2,16 @@ import { ComponentSettings, Manager, MCEvent } from '@managed-components/types'
 import UAParser from 'ua-parser-js'
 
 // Get the user ID stored in the client, if it does not exist, then do not set it.
-const getUserId = (event: MCEvent) => {
-  const { client } = event
-  let userId = event.payload.user_id || client.get('user_id')
+const getUserId = (event: MCEvent): string | null => {
+  const { client } = event;
+  let userId = event.payload.user_id || client.get('user_id');
   if (!userId) {
-    return null
+    return null;
   }
-  return userId
+  if (event.payload.user_id) {
+    client.set('user_id', userId, { scope: 'infinite' });
+  }
+  return userId;
 }
 
 // Get the device ID stored in the client, if it does not exist, make a random one, save it in the client, and return it.
@@ -58,8 +61,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       event_type: pageview ? 'pageview' : payload.event_type,
       ...(userId && {
         user_id: userId,
-      })
-      user_id?: getUserId(event),
+      }),
       event_properties: { url: client.url },
       user_properties: {},
       groups: {},
