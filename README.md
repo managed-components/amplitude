@@ -16,6 +16,10 @@ This Managed Component (MC) uses [Amplitude’s HTTP API v2](https://www.docs.de
 
 `api_key` Used to pass your Amplitude's Project API key. See [Find your Amplitude Project API Credentials](https://www.docs.developers.amplitude.com/analytics/find-api-credentials/) for help locating your credentials.
 
+#### EU Data Residency `boolean` _optional_
+
+`eu_data` For EU data residency, the project must first be set up inside [Amplitude EU](https://analytics.eu.amplitude.com/signup). Toggle on this field to change the standard endpoint with the EU residency endpoint: `https://api.eu.amplitude.com/2/httpapi`.
+
 #### Minimun Id Length `Integer`, _optional_
 
 `min_id_length` Use this field to override the Device IDs and User IDs minimum length. For more information, see Amplitude's docs for [Options](https://www.docs.developers.amplitude.com/analytics/apis/http-v2-api/#options).
