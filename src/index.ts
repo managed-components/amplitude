@@ -143,8 +143,12 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       events: [eventData],
     }
 
-    const amplitudeEndpoint = 'https://api2.amplitude.com/2/httpapi'
-    manager.fetch(amplitudeEndpoint, {
+    const amplitudeEndpoint = (settings: ComponentSettings): string => {
+      return settings.eu_data
+        ? 'https://api.eu.amplitude.com/2/httpapi'
+        : 'https://api2.amplitude.com/2/httpapi'
+    }
+    manager.fetch(`${amplitudeEndpoint(settings)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
