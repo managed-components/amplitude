@@ -52,6 +52,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     const payload = ecomPayload ? ecomPayload : event.payload
     // eventData builds the eventData object to be used in the request body
     const userId = getUserId(event)
+    delete payload.eu_data
 
     const eventData = {
       event_type: pageview ? 'pageview' : payload.event_type,
@@ -118,23 +119,26 @@ export default async function (manager: Manager, settings: ComponentSettings) {
   }
 
   manager.addEventListener('pageview', async event => {
+    const isEUEndpoint = !!event.payload.eu_data
     const eventData = getEventData(event, true)
-    sendEvent(eventData)
+    sendEvent(eventData, isEUEndpoint)
   })
 
   manager.addEventListener('event', async event => {
+    const isEUEndpoint = !!event.payload.eu_data
     const eventData = getEventData(event, false)
-    sendEvent(eventData)
+    sendEvent(eventData, isEUEndpoint)
   })
 
   manager.addEventListener('ecommerce', async event => {
+    const isEUEndpoint = !!event.payload.eu_data
     const ecomPayload = ecomDataMap(event)
     const eventData = getEventData(event, false, ecomPayload)
-    sendEvent(eventData)
+    sendEvent(eventData, isEUEndpoint)
   })
 
   // sendEvent function is the main functions to send a server side request
-  const sendEvent = async (eventData: any) => {
+  const sendEvent = async (eventData: any, isEUEndpoint: boolean) => {
     const requestBody = {
       api_key: settings.api_key,
       ...(settings.min_id_length && {
@@ -143,7 +147,7 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       events: [eventData],
     }
 
-    const endpoint = settings.eu_data
+    const endpoint = isEUEndpoint
       ? 'https://api.eu.amplitude.com/2/httpapi'
       : 'https://api2.amplitude.com/2/httpapi'
 
