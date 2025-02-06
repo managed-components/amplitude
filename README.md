@@ -42,15 +42,15 @@ Amplitude distinguishes between Event Properties, User Properties, and Group Pro
 
 ##### Event Properties `object` _optional_
 
-`event_properties` All Properties are by default sent as `event_properties`. This is true with the exception of properties that begin with `user_` or `groups_` prefixes.
+`event_properties` To send `event_properties`, name your fields/event parameters with the prefix `"event_properties."`. For example, in WebCM: `webcm.track('event', {name: 'signup', event_properties.device: 'iphone'})`. The following code should end up adding `device` to `event_properties`. It will omit the prefix from the property name, so it will send `device` as the key and `iphone` as the value.
 
 ##### User Properties `object` _optional_
 
-`user_properties` To send `user_properties`, name your fields/event parameters with the prefix `"user_"`. For example, in WebCM: `webcm.track('event', { name: 'signup', user_name: 'My Name' })`. Since in WebCM, all event properties are automatically directed to the tool without the need for mapping configuration, the following code should add `user_name` to `user_properties`. It will omit the prefix from the property name, so it will send `name` as the key and `My Name` as the value.
+`user_properties` To send `user_properties`, name your fields/event parameters with the prefix `"user_properties."`. For example, in WebCM: `webcm.track('event', { name: 'signup', user_properties.name: 'My Name' })`. The following code should add `name` to `user_properties`. It will omit the prefix from the property name, so it will send `name` as the key and `My Name` as the value.
 
 ##### Groups `object` _optional_
 
-`groups` To send the `groups` property, name your fields/event parameters with the prefix `“groups_”`. For example, in WebCM: `webcm.track('event', {name: 'signup', groups_company: 'My Company Name'})`. Since in WebCM all of the event properties are automatically directed to the tool (without the need for mapping configuration), the following code should end up adding `groups_company` to `groups`. It will omit the prefix from the property name, so it will send `company` as the key and `My Company` as the value.
+`groups` To send the `groups` property, name your fields/event parameters with the prefix `“groups.”`. For example, in WebCM: `webcm.track('event', {name: 'signup', groups.company: 'My Company Name'})`. The following code should end up adding `company` to `groups`. It will omit the prefix from the property name, so it will send `company` as the key and `My Company` as the value.
 
 ##### User ID `string` _optional_
 

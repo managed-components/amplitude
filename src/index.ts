@@ -1,5 +1,4 @@
 import { ComponentSettings, Manager, MCEvent } from '@managed-components/types'
-import UAParser from 'ua-parser-js'
 
 // Get the user ID stored in the client, if it does not exist, then do not set it.
 const getUserId = (event: MCEvent): string | null => {
@@ -8,17 +7,6 @@ const getUserId = (event: MCEvent): string | null => {
     return null
   }
   return userId
-}
-
-// Get the device ID stored in the client, if it does not exist, make a random one, save it in the client, and return it.
-const getDeviceId = (event: MCEvent) => {
-  const { client } = event
-  let deviceId = event.payload.device_id || client.get('device_id')
-  if (!deviceId) {
-    deviceId = crypto.randomUUID()
-    client.set('device_id', deviceId, { scope: 'infinite' })
-  }
-  return deviceId
 }
 
 // Get the session ID stored in the client, if it does not exist, make a new one, save it in the client, and return it.
@@ -39,6 +27,19 @@ const getEventId = (event: MCEvent) => {
   let eventId = parseInt(client.get('event_id') as string) || 1
   eventId++
   client.set('event_id', eventId.toString(), { scope: 'infinite' })
+
+  return eventId
+}
+
+export interface EventData {
+  event_type: string
+  user_id?: string
+  event_properties: Record<string, any>
+  user_properties: Record<string, any>
+  groups: Record<string, any>
+  event_id: number
+  session_id: string
+  [key: string]: any // Other top level properties
 }
 
 export default async function (manager: Manager, settings: ComponentSettings) {
@@ -48,13 +49,12 @@ export default async function (manager: Manager, settings: ComponentSettings) {
     ecomPayload?: any
   ) => {
     const { client } = event
-    const parsedUserAgent = UAParser(client.userAgent)
     const payload = ecomPayload ? ecomPayload : event.payload
     // eventData builds the eventData object to be used in the request body
     const userId = getUserId(event)
     delete payload.eu_data
 
-    const eventData = {
+    const eventData: EventData = {
       event_type: pageview ? 'pageview' : payload.event_type,
       ...(userId && {
         user_id: userId,
@@ -62,34 +62,23 @@ export default async function (manager: Manager, settings: ComponentSettings) {
       event_properties: { url: client.url },
       user_properties: {},
       groups: {},
-      language: client.language,
-      ip: client.ip,
       event_id: getEventId(event),
       session_id: getSessionId(event),
-      os_name: parsedUserAgent.os.name,
-      os_version: parsedUserAgent.os.version,
-      device_manufacturer: parsedUserAgent.device.vendor,
-      device_model: parsedUserAgent.device.model,
-      device_id: getDeviceId(event),
-      ...(payload.app_version && {
-        app_version: payload.app_version,
-      }),
-      ...(payload.insert_id && {
-        insert_id: payload.insert_id,
-      }),
-      ...(payload.revenue && { revenue: payload.revenue }),
-      ...(payload.revenueType && { revenueType: payload.revenueType }),
-      ...(payload.productId && { productId: payload.productId }),
-      ...(payload.quantity && { quantity: payload.quantity }),
     }
-
+    /*
+    Maps the event properties, user properties and groups. 
+    Will overwrite the top level properties (user_id/session_id/os_name/etc) if they are defined in the Zaraz UI - else it'll use the default values defined above.
+    */
     for (const [key, value] of Object.entries(payload)) {
-      if (key.startsWith('user_')) {
-        eventData.user_properties[key.substring(5)] = value
-      } else if (key.startsWith('groups_')) {
+      if (key.startsWith('event_properties.')) {
+        const _key = key.substring(17)
+        eventData.event_properties[_key] = value
+      } else if (key.startsWith('user_properties.')) {
+        eventData.user_properties[key.substring(16)] = value
+      } else if (key.startsWith('groups.')) {
         eventData.groups[key.substring(7)] = value
       } else {
-        eventData.event_properties[key] = value
+        eventData[key] = value
       }
     }
     return eventData
