@@ -1,4 +1,14 @@
-# Amplitude Managed Component
+# Blinq Fork of Amplitude Managed Component
+
+This is a fork of [Amplitude Managed Component](https://github.com/managed-components/amplitude)
+
+TL;DR - You now will have full control of the entire Amplitude payload. Whereas, previously you didn't.
+
+The main changes we've made here are:
+
+1. The ability to edit/override the top level fields. The main problem Blinq was facing was that the original repo would automatically set the device properties to the userAgent on the client. Which, for our use case we didn't want. Additionally we had no control over this. This fork fixes these problems.
+2. Better prefix structure for sending user_properties/event_properties/groups. This fixes some of the bugs from the original repo. For example in the original repo: Sending a value to `user_id` in Zaraz would result in both the `user_id` property and `user_properties.id` to be set. This is NOT desired.
+3. All the device properties are not getting set for you. We have found this redundant as you could simply set these yourself in Zaraz. This allows you to have more control over the payload and your analytics.
 
 ## Supported Event Types
 
